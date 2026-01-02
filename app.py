@@ -35,6 +35,10 @@ def generate():
             "features": stations
         }
         
+        # Check if client wants JSON (for map) or file download
+        if request.args.get('format') == 'json' or request.headers.get('Accept') == 'application/json':
+            return jsonify(geojson)
+
         # Create a file-like object to send
         mem = io.BytesIO()
         mem.write(json.dumps(geojson, indent=2).encode('utf-8'))
