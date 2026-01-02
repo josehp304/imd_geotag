@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMD Weather Data Generator</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify_content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: white;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="datetime-local"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Calendar icon inversion for dark mode */
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.875rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+            display: flex;
+            justify_content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading .spinner {
+            display: block;
+        }
+
+        .loading span {
+            display: none;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>IMD GeoJSON Generator</h1>
+
+        <form action="/generate" method="POST" id="geoForm">
+            <div class="form-group">
+                <label for="start_time">Start Date & Time</label>
+                <input type="datetime-local" id="start_time" name="start_time" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end_time">End Date & Time</label>
+                <input type="datetime-local" id="end_time" name="end_time" required>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span>Generate GeoJSON</span>
+                <div class="spinner"></div>
+            </button>
+        </form>
+
+        <div class="footer">
+            Data provided by Ogimet • Outputs standard GeoJSON
+        </div>
+    </div>
+
+    <script>
+        // Set default values (Last 3 hours)
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const threeHoursAgo = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+
+            // Format for datetime-local: YYYY-MM-DDTHH:mm
+            const formatForInput = (date) => {
+                const pad = (num) => String(num).padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            };
+
+            document.getElementById('start_time').value = formatForInput(threeHoursAgo);
+            document.getElementById('end_time').value = formatForInput(now);
+        });
+
+        document.getElementById('geoForm').addEventListener('submit', function () {
+            const btn = document.getElementById('submitBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            // Re-enable after a few seconds (since it's a download, page won't refresh)
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }, 3000);
+        });
+    </script>
+</body>
+
+</html>
