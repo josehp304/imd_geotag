@@ -21,7 +21,7 @@ const MapComponent: React.FC = () => {
     const [geoJsonData, setGeoJsonData] = useState(null);
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/stations')
+        axios.get('/api/stations')
             .then(response => {
                 setGeoJsonData(response.data);
             })
